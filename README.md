@@ -1,4 +1,4 @@
-```
+
 # Aircraft Engine Anomaly Detection
 
 Unsupervised anomaly detection for aircraft engine health monitoring using autoencoders. The system learns normal engine behavior from sensor data and flags deviations that indicate early-stage degradation — without needing any labeled failure data.
@@ -34,47 +34,33 @@ Tested on 100 completely unseen engines (test_FD001.txt). Clear inverse correlat
 - **Backend:** Flask
 - **Frontend:** HTML, CSS, vanilla JS, Chart.js
 
-## Project Structure
-
-```
-├── data/               # NASA C-MAPSS FD001 dataset
-├── models/             # saved model weights and scalers
-├── notebooks/          # EDA and model development
-├── templates/          # HTML pages
-├── static/             # CSS, JS, images
-│   ├── css/
-│   ├── js/
-│   └── images/
-├── app.py              # Flask server
-├── requirements.txt
-└── README.md
-```
-
 ## Dashboard
 
 Three pages with dark-themed industrial UI:
 
 ### Engine Dashboard
+
 Select any train or test engine. View reconstruction error timeline with warning/critical zones, engine status, and key metrics.
 
-![Dashboard](static/images/dashboard.png)
+![Dashboard](./static/images/dashboard.png)
 
 ### Fleet Overview
+
 Scatter plot of reconstruction error vs remaining life across all 100 test engines. Sortable table with health status for every engine.
 
-![Fleet Overview](static/images/fleet.png)
+![Fleet Overview](./static/images/fleet.png)
 
 ### Model Comparison
+
 Side by side comparison of Autoencoder, Isolation Forest, and DBSCAN for the same engine. Visual proof of why the autoencoder wins.
 
-![Comparison](static/images/comparison.png)
+![Comparison](./static/images/comparision.png)
 
 ## Setup
 
-```bash
+```
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 python app.py
-```
 ```
