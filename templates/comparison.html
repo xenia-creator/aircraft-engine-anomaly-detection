@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Model Comparison{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Model Comparison</div>
+    <div class="page-subtitle">Autoencoder vs. Isolation Forest vs. DBSCAN on the same engine</div>
+  </div>
+  <div class="controls">
+    <select class="select" id="dataset-select">
+      <option value="train">Train set</option>
+      <option value="test">Test set</option>
+    </select>
+    <select class="select" id="engine-select">
+      <option value="">Loading…</option>
+    </select>
+  </div>
+</div>
+
+<div class="card chart-card" style="margin-bottom:18px;">
+  <div class="card-title">Autoencoder — Reconstruction Error</div>
+  <div class="card-subtitle">Smooth, continuous anomaly score with warning/critical thresholds</div>
+  <div class="chart-wrap" style="height:260px;">
+    <canvas id="chart-autoencoder"></canvas>
+  </div>
+</div>
+
+<div class="card chart-card" style="margin-bottom:18px;">
+  <div class="card-title">Isolation Forest — Anomaly Score</div>
+  <div class="card-subtitle">Higher = more normal, lower / negative = more anomalous (decision function)</div>
+  <div class="chart-wrap" style="height:260px;">
+    <canvas id="chart-isolation"></canvas>
+  </div>
+</div>
+
+<div class="card chart-card">
+  <div class="card-title">DBSCAN — Cluster Labels</div>
+  <div class="card-subtitle">−1 = anomaly, 0+ = normal cluster membership</div>
+  <div class="chart-wrap" style="height:220px;">
+    <canvas id="chart-dbscan"></canvas>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/charts-common.js') }}"></script>
+<script src="{{ url_for('static', filename='js/comparison.js') }}"></script>
+{% endblock %}

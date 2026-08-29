@@ -52,9 +52,22 @@ Tested on 100 completely unseen engines (test_FD001.txt). Clear inverse correlat
 
 ## Dashboard
 
-1. **Engine Dashboard** — select engine, view reconstruction error timeline with warning/critical zones, engine health status
-2. **Fleet Overview** — scatter plot of error vs remaining life across all test engines, fleet health summary
-3. **Model Comparison** — side by side Autoencoder vs Isolation Forest vs DBSCAN for selected engine
+Three pages with dark-themed industrial UI:
+
+### Engine Dashboard
+Select any train or test engine. View reconstruction error timeline with warning/critical zones, engine status, and key metrics.
+
+![Dashboard](static/images/dashboard.png)
+
+### Fleet Overview
+Scatter plot of reconstruction error vs remaining life across all 100 test engines. Sortable table with health status for every engine.
+
+![Fleet Overview](static/images/fleet.png)
+
+### Model Comparison
+Side by side comparison of Autoencoder, Isolation Forest, and DBSCAN for the same engine. Visual proof of why the autoencoder wins.
+
+![Comparison](static/images/comparison.png)
 
 ## Setup
 
