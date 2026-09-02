@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}LSTM Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">LSTM Autoencoder Dashboard</div>
+    <div class="page-subtitle">Sequence reconstruction-error monitoring using 30-cycle sliding windows</div>
+  </div>
+  <div class="controls">
+    <span id="rul-badge" class="badge-inline" style="display:none;">RUL <span class="value" id="rul-value">—</span> cycles</span>
+    <select class="select" id="dataset-select">
+      <option value="train">Train set</option>
+      <option value="test">Test set</option>
+    </select>
+    <select class="select" id="engine-select">
+      <option value="">Loading…</option>
+    </select>
+  </div>
+</div>
+
+<div class="grid grid-4" style="margin-bottom:18px;">
+  <div class="card stat-card">
+    <div class="stat-head">
+      <span class="stat-label">Latest Window Error</span>
+      <span class="icon-box" id="icon-error">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 6"/><polyline points="14 6 21 6 21 13"/></svg>
+      </span>
+    </div>
+    <div class="stat-value" id="stat-latest-error">—</div>
+    <div class="stat-note muted" id="stat-error-note">Awaiting data</div>
+  </div>
+
+  <div class="card stat-card">
+    <div class="stat-head">
+      <span class="stat-label">Engine Status</span>
+      <span class="icon-box amber" id="icon-status">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+      </span>
+    </div>
+    <div id="stat-status-badge"><span class="badge badge-healthy">—</span></div>
+    <div class="stat-note muted" id="stat-status-note">Based on latest window</div>
+  </div>
+
+  <div class="card stat-card">
+    <div class="stat-head">
+      <span class="stat-label">Total Cycles</span>
+      <span class="icon-box violet" id="icon-cycles">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+      </span>
+    </div>
+    <div class="stat-value" id="stat-total-cycles">—<span class="unit">cycles</span></div>
+    <div class="stat-note muted" id="stat-cycles-note">Recorded lifetime</div>
+  </div>
+
+  <div class="card stat-card">
+    <div class="stat-head">
+      <span class="stat-label">First Warning Cycle</span>
+      <span class="icon-box amber" id="icon-warning">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+      </span>
+    </div>
+    <div class="stat-value" id="stat-first-warning">—</div>
+    <div class="stat-note muted" id="stat-warning-note">First critical cycle: —</div>
+  </div>
+</div>
+
+<div class="card chart-card">
+  <div class="card-title">Sequence Reconstruction Error Over Time</div>
+  <div class="card-subtitle" id="chart-subtitle">LSTM autoencoder MSE per 30-cycle window, with warning (3.0σ) and critical (3.5σ) thresholds</div>
+  <div class="chart-wrap" style="height:380px;">
+    <canvas id="error-chart"></canvas>
+  </div>
+  <div class="empty-text" id="empty-state" style="display:none;">
+    This engine has fewer cycles than one 30-cycle window, so the LSTM produces no error series for it.
+  </div>
+  <div class="legend-row">
+    <div class="legend-item"><span class="legend-swatch" style="background:rgba(34,197,94,0.35)"></span>Healthy zone</div>
+    <div class="legend-item"><span class="legend-swatch" style="background:rgba(245,158,11,0.4)"></span>Warning zone</div>
+    <div class="legend-item"><span class="legend-swatch" style="background:rgba(239,68,68,0.45)"></span>Critical zone</div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/charts-common.js') }}"></script>
+<script src="{{ url_for('static', filename='js/lstm.js') }}"></script>
+{% endblock %}

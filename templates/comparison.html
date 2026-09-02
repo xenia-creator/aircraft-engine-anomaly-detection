@@ -5,7 +5,7 @@
 <div class="page-header">
   <div>
     <div class="page-title">Model Comparison</div>
-    <div class="page-subtitle">Autoencoder vs. Isolation Forest vs. DBSCAN on the same engine</div>
+    <div class="page-subtitle">Autoencoder vs. Isolation Forest vs. DBSCAN vs. LSTM autoencoder on the same engine</div>
   </div>
   <div class="controls">
     <select class="select" id="dataset-select">
@@ -34,11 +34,22 @@
   </div>
 </div>
 
-<div class="card chart-card">
+<div class="card chart-card" style="margin-bottom:18px;">
   <div class="card-title">DBSCAN — Cluster Labels</div>
   <div class="card-subtitle">−1 = anomaly, 0+ = normal cluster membership</div>
   <div class="chart-wrap" style="height:220px;">
     <canvas id="chart-dbscan"></canvas>
+  </div>
+</div>
+
+<div class="card chart-card">
+  <div class="card-title">LSTM Autoencoder — Sequence Reconstruction Error</div>
+  <div class="card-subtitle">Smooth temporal anomaly score with warning/critical thresholds</div>
+  <div class="chart-wrap" style="height:260px;">
+    <canvas id="chart-lstm"></canvas>
+  </div>
+  <div class="empty-text" id="lstm-empty" style="display:none;">
+    This engine has fewer cycles than one 30-cycle window, so the LSTM produces no error series for it.
   </div>
 </div>
 {% endblock %}

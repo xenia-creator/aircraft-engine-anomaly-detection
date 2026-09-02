@@ -29,6 +29,14 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
         <span>Engine Dashboard</span>
       </a>
+      <a href="/lstm" class="nav-item {% if request.path == '/lstm' %}active{% endif %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 12 6 12 9 5 13 19 16 12 22 12"/></svg>
+        <span>LSTM Dashboard</span>
+      </a>
+      <a href="/lstm-fleet" class="nav-item {% if request.path == '/lstm-fleet' %}active{% endif %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="4 15 8 15 10 10 13 17 15 15 20 15"/></svg>
+        <span>LSTM Fleet Overview</span>
+      </a>
       <a href="/fleet" class="nav-item {% if request.path == '/fleet' %}active{% endif %}">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 9 9"/><path d="M7 14l3-4 3 2 4-6"/></svg>
         <span>Fleet Overview</span>

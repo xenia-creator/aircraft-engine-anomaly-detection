@@ -5,6 +5,7 @@
   let aeChart = null;
   let ifChart = null;
   let dbChart = null;
+  let lstmChart = null;
 
   async function loadEngineList() {
     const res = await fetch('/api/engine_list');
@@ -160,6 +161,63 @@
     });
   }
 
+  // The LSTM scores 30-cycle windows rather than single cycles, so its series is
+  // shorter than the other three and carries its own thresholds.
+  function renderLstmChart(lstm) {
+    const emptyEl = document.getElementById('lstm-empty');
+    const wrapEl = document.getElementById('chart-lstm').parentElement;
+
+    if (lstmChart) {
+      lstmChart.destroy();
+      lstmChart = null;
+    }
+
+    if (!lstm || !lstm.errors.length) {
+      wrapEl.style.display = 'none';
+      emptyEl.style.display = 'block';
+      return;
+    }
+    wrapEl.style.display = '';
+    emptyEl.style.display = 'none';
+
+    const ctx = document.getElementById('chart-lstm').getContext('2d');
+    const points = lstm.cycles.map((c, i) => ({ x: c, y: lstm.errors[i] }));
+    const maxY = Math.max(lstm.critical * 1.3, ...lstm.errors) * 1.05;
+    const opts = baseLineOptions('Cycle (window end)', 'Sequence MSE');
+
+    lstmChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        datasets: [
+          {
+            label: 'Window reconstruction error',
+            data: points,
+            borderColor: CHART_COLORS.accentStrong,
+            backgroundColor: (context) => {
+              const { ctx, chartArea } = context.chart;
+              if (!chartArea) return 'rgba(34,211,238,0.15)';
+              return verticalGradient(ctx, chartArea, 'rgba(34,211,238,0.35)', 'rgba(34,211,238,0.02)');
+            },
+            borderWidth: 2,
+            pointRadius: 0,
+            pointHoverRadius: 4,
+            fill: true,
+            tension: 0.25
+          },
+          ...thresholdLineDatasets(lstm.cycles, lstm.warning, lstm.critical)
+        ]
+      },
+      options: {
+        ...opts,
+        scales: {
+          ...opts.scales,
+          y: { ...opts.scales.y, min: 0, max: maxY }
+        }
+      },
+      plugins: [thresholdZonePlugin(lstm.warning, lstm.critical, maxY)]
+    });
+  }
+
   async function loadComparison() {
     const unitId = engineSelect.value;
     const dataset = datasetSelect.value;
@@ -171,6 +229,7 @@
     renderAutoencoderChart(data.autoencoder, data.warning, data.critical);
     renderIsolationChart(data.isolation_forest);
     renderDbscanChart(data.dbscan);
+    renderLstmChart(data.lstm);
   }
 
   async function init() {
