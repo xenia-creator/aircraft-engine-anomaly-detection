@@ -8,6 +8,8 @@
   const HISTORY_KEY = 'chatHistory';
   const LANG_KEY = 'chatLanguage';
   const OPEN_KEY = 'chatOpen';
+  const POSITION_KEY = 'chatPosition';
+  const DRAG_RESET_BREAKPOINT = 640;
 
   const WELCOME = {
     english: "Hi! I'm your engine health assistant. Ask me about anomaly scores, thresholds, or a specific engine.",
@@ -17,8 +19,11 @@
 
   const fab = document.getElementById('chat-fab');
   const panel = document.getElementById('chat-panel');
+  const header = document.querySelector('.chat-header');
+  const headerRight = document.querySelector('.chat-header-right');
   const closeBtn = document.getElementById('chat-close-btn');
   const clearBtn = document.getElementById('chat-clear-btn');
+  const fullscreenBtn = document.getElementById('chat-fullscreen-btn');
   const messagesEl = document.getElementById('chat-messages');
   const typingEl = document.getElementById('chat-typing');
   const inputEl = document.getElementById('chat-input');
@@ -205,6 +210,9 @@
     fab.classList.remove('is-open');
     fab.setAttribute('aria-label', 'Open Engine Assistant');
     sessionStorage.setItem(OPEN_KEY, '0');
+    panel.classList.remove('fullscreen');
+    fullscreenBtn.classList.remove('is-full');
+    fullscreenBtn.setAttribute('aria-label', 'Fullscreen');
   }
 
   function setLanguage(lang) {
@@ -214,12 +222,117 @@
     if (history.length === 0) renderMessages();
   }
 
+  // ---- dragging (reposition via the header) ----
+  let dragState = null;
+  let dragMoved = false;
+
+  function savePosition() {
+    try {
+      sessionStorage.setItem(POSITION_KEY, JSON.stringify({ left: panel.style.left, top: panel.style.top }));
+    } catch (e) {
+      // storage unavailable - position just won't persist across navigation
+    }
+  }
+
+  function resetPosition() {
+    panel.classList.remove('chat-panel--custom-pos');
+    panel.style.left = '';
+    panel.style.top = '';
+    try {
+      sessionStorage.removeItem(POSITION_KEY);
+    } catch (e) {
+      // storage unavailable
+    }
+  }
+
+  function applyStoredPosition() {
+    if (window.innerWidth < DRAG_RESET_BREAKPOINT) return;
+    let pos = null;
+    try {
+      pos = JSON.parse(sessionStorage.getItem(POSITION_KEY) || 'null');
+    } catch (e) {
+      pos = null;
+    }
+    if (pos && pos.left && pos.top) {
+      panel.style.left = pos.left;
+      panel.style.top = pos.top;
+      panel.classList.add('chat-panel--custom-pos');
+    }
+  }
+
+  function onHeaderMouseMove(e) {
+    if (!dragState) return;
+    dragMoved = true;
+    const maxLeft = Math.max(window.innerWidth - dragState.width, 0);
+    const maxTop = Math.max(window.innerHeight - dragState.height, 0);
+    const newLeft = Math.min(Math.max(dragState.startLeft + (e.clientX - dragState.startX), 0), maxLeft);
+    const newTop = Math.min(Math.max(dragState.startTop + (e.clientY - dragState.startY), 0), maxTop);
+    panel.style.left = newLeft + 'px';
+    panel.style.top = newTop + 'px';
+  }
+
+  function onHeaderMouseUp() {
+    if (!dragState) return;
+    dragState = null;
+    panel.classList.remove('dragging');
+    document.body.classList.remove('chat-no-select');
+    document.removeEventListener('mousemove', onHeaderMouseMove);
+    document.removeEventListener('mouseup', onHeaderMouseUp);
+    savePosition();
+    setTimeout(() => { dragMoved = false; }, 0);
+  }
+
+  function onHeaderMouseDown(e) {
+    if (e.button !== 0) return; // left-click drag only
+    if (panel.classList.contains('fullscreen')) return;
+    if (headerRight.contains(e.target)) return; // let header buttons/lang toggle handle their own clicks
+
+    const rect = panel.getBoundingClientRect();
+    dragState = {
+      startX: e.clientX,
+      startY: e.clientY,
+      startLeft: rect.left,
+      startTop: rect.top,
+      width: rect.width,
+      height: rect.height
+    };
+    panel.style.left = rect.left + 'px';
+    panel.style.top = rect.top + 'px';
+    panel.classList.add('chat-panel--custom-pos', 'dragging');
+    document.body.classList.add('chat-no-select');
+    document.addEventListener('mousemove', onHeaderMouseMove);
+    document.addEventListener('mouseup', onHeaderMouseUp);
+    e.preventDefault();
+  }
+
+  // ---- fullscreen ----
+  function toggleFullscreen() {
+    const isFull = panel.classList.toggle('fullscreen');
+    fullscreenBtn.classList.toggle('is-full', isFull);
+    fullscreenBtn.setAttribute('aria-label', isFull ? 'Exit fullscreen' : 'Fullscreen');
+  }
+
   // ---- wire up ----
   fab.addEventListener('click', () => {
     if (panel.classList.contains('open')) closePanel();
     else openPanel();
   });
   closeBtn.addEventListener('click', closePanel);
+  fullscreenBtn.addEventListener('click', toggleFullscreen);
+  header.addEventListener('mousedown', onHeaderMouseDown);
+
+  window.addEventListener('resize', () => {
+    if (window.innerWidth < DRAG_RESET_BREAKPOINT && panel.classList.contains('chat-panel--custom-pos')) {
+      resetPosition();
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    if (dragMoved) return;
+    if (!panel.classList.contains('open')) return;
+    if (panel.contains(e.target) || fab.contains(e.target)) return;
+    closePanel();
+  });
 
   clearBtn.addEventListener('click', () => {
     history = [];
@@ -248,5 +361,6 @@
   renderMessages();
   langBtns.forEach((b) => b.classList.toggle('active', b.dataset.lang === language));
   updateSendState();
+  applyStoredPosition();
   if (sessionStorage.getItem(OPEN_KEY) === '1') openPanel();
 })();
