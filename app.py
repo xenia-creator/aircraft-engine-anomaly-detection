@@ -114,11 +114,11 @@ columns = ['unit_id', 'cycle', 'op1', 'op2', 'op3',
 keep_sensors = ['s2', 's3', 's4', 's7', 's8', 's9', 's11', 's12',
                 's13', 's14', 's15', 's17', 's20', 's21']
 
-train_df = pd.read_csv('data/train_FD001.txt', sep='\s+', header=None, names=columns)
+train_df = pd.read_csv('data/train_FD001.txt', sep=r'\s+', header=None, names=columns)
 train_df = train_df[['unit_id', 'cycle'] + keep_sensors]
 train_df[keep_sensors] = scaler.transform(train_df[keep_sensors])
 
-test_df = pd.read_csv('data/test_FD001.txt', sep='\s+', header=None, names=columns)
+test_df = pd.read_csv('data/test_FD001.txt', sep=r'\s+', header=None, names=columns)
 test_df = test_df[['unit_id', 'cycle'] + keep_sensors]
 test_df[keep_sensors] = scaler.transform(test_df[keep_sensors])
 

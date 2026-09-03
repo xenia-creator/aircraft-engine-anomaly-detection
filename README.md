@@ -44,6 +44,18 @@ Select any train or test engine. View reconstruction error timeline with warning
 
 ![Dashboard](./static/images/dashboard.png)
 
+### AI Assistant
+
+Integrated chat widget powered by Gemini AI, available on every page. The assistant:
+
+- Understands the current page context — which engine is selected, its status, error values
+- Answers questions about engine health, sensor data, anomaly detection results, and maintenance decisions
+- Maintains conversation memory across messages
+- Supports English, Hindi, and Kannada responses
+- Only responds to project-related questions
+
+![Chat Widget](./static/images/chat.png)
+
 ### Fleet Overview
 
 Scatter plot of reconstruction error vs remaining life across all 100 test engines. Sortable table with health status for every engine.
