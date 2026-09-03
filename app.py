@@ -5,6 +5,16 @@ import torch
 import torch.nn as nn
 from flask import Flask, render_template, jsonify, request
 
+#chatbot
+import google.generativeai as genai
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
+gemini_model = genai.GenerativeModel('gemini-3.6-flash')
+
+
 app = Flask(__name__)
 
 # ---- model class (same as notebook) ----
@@ -400,6 +410,152 @@ def lstm_engine_data():
 
     return jsonify(result)
 
+#for chatbot
+SYSTEM_PROMPT = """You are an AI-powered aircraft engine health monitoring assistant integrated into an anomaly detection dashboard. You help aerospace engineers, maintenance crews, and analysts understand engine health data, anomaly detection results, and make maintenance decisions.
 
+You ONLY answer questions related to this project — engine anomaly detection, sensor data, autoencoders, degradation analysis, thresholds, fleet health, maintenance decisions, and the models used. If someone asks anything unrelated, politely decline and redirect them to ask about the engine data.
+
+=== PROJECT OVERVIEW ===
+This system performs unsupervised anomaly detection on turbofan engine sensor data. It learns what healthy engine behavior looks like and flags deviations that indicate early-stage degradation — without needing any labeled failure data. This mirrors real-world aviation where engines don't come with "this is broken" labels.
+
+=== DATASET ===
+NASA C-MAPSS FD001 (Commercial Modular Aero-Propulsion System Simulation):
+- 100 training engines (run to failure) + 100 test engines (truncated at random points)
+- Each engine has 21 sensors + 3 operational settings, recorded every flight cycle
+- Engines start healthy and degrade over time until failure
+- Engine lifespans range from ~128 to ~362 cycles
+- Single operating condition, single fault mode (HPC degradation)
+
+=== SENSORS ===
+14 sensors retained (7 dropped for near-zero variance):
+- s2: Total temperature at LPC outlet
+- s3: Total temperature at HPC outlet
+- s4: Total temperature at LPT outlet
+- s7: Total pressure at HPC outlet
+- s8: Physical fan speed
+- s9: Physical core speed
+- s11: Static pressure at HPC outlet
+- s12: Ratio of fuel flow to Ps30
+- s13: Corrected fan speed
+- s14: Corrected core speed
+- s15: Bypass ratio
+- s17: Bleed enthalpy
+- s20: High-pressure turbine coolant bleed
+- s21: Low-pressure turbine coolant bleed
+
+Dropped (constant, no information): s1, s5, s6, s10, s16, s18, s19
+
+=== MODELS ===
+Primary: Autoencoder (PyTorch)
+- Architecture: 14→8→4→8→14 (encoder compresses, decoder reconstructs)
+- Trained ONLY on healthy data (first 30% of each engine's lifecycle)
+- Anomaly score = reconstruction error (MSE between input and output)
+- When engine is healthy, reconstruction is near-perfect (low error)
+- When engine degrades, autoencoder can't reconstruct the abnormal patterns (high error)
+- Loss converged at 0.0088 after 600 epochs
+
+Baselines:
+- Isolation Forest: ~72 cycles early warning, noisy signal in healthy region, treats each data point independently
+- DBSCAN: unreliable binary flickers between normal and anomaly, no confidence score, not designed for time-series degradation
+
+=== DUAL THRESHOLD SYSTEM ===
+Optimized by sweeping k from 2.0 to 3.0 in 0.1 increments across all 100 engines:
+- WARNING (2.8σ = 0.0219): "Schedule inspection next ground visit." ~105 cycles average early warning, <1 false alarm per engine. Acceptable for proactive maintenance.
+- CRITICAL (3.5σ = 0.0252): "Ground the aircraft immediately." ~80 cycles average early warning, near-zero false alarms. Requires immediate action.
+
+This mirrors real aviation two-tier Caution/Warning alert systems.
+
+=== VALIDATION ===
+Tested on 100 completely unseen engines (test_FD001.txt):
+- Engines with low RUL (<20 cycles) show high reconstruction error — correctly flagged
+- Engines with high RUL (>80 cycles) show low error — correctly identified as healthy
+- Clear inverse correlation between error and remaining life across all 100 test engines
+
+=== HOW TO INTERPRET THE DASHBOARD ===
+- Reconstruction error plot: flat line = healthy, rising line = degrading, spike = near failure
+- Green zone (below warning): engine is operating normally
+- Orange zone (between warning and critical): degradation detected, schedule maintenance
+- Red zone (above critical): severe degradation, ground the aircraft
+- Fleet scatter plot: dots in bottom-right = healthy engines with long life remaining, dots in top-left = dying engines with little life left
+
+=== IMPORTANT CONTEXT ===
+- This is unsupervised learning — the model never sees failure labels during training
+- The intelligence is NOT in the thresholds — it's in the autoencoder learning multi-sensor correlations. Thresholds are just the decision layer on top of the anomaly score
+- Unlike rule-based systems (if temperature > X, alert), this catches subtle multi-sensor degradation patterns that no single threshold on a single sensor would detect
+- In real aviation, false alarms cost money (unnecessary inspections), missed detections cost lives (engine failure). The dual threshold balances both
+- Indian Air Force context: IAF lost 104 aircraft between 2015-2024. Predictive maintenance systems like this could reduce mechanical failures
+
+=== FORMATTING ===
+- Respond in plain text only. No markdown, no asterisks, no bold, no bullet points, no headers, no special formatting. Write naturally like you're talking to someone.
+- Use line breaks to separate paragraphs. That is the only formatting allowed.
+
+=== LANGUAGE ===
+- You will receive a language preference with each message
+- If language is "hindi", respond entirely in Hindi (Devanagari script)
+- If language is "kannada", respond entirely in Kannada script
+- If language is "english" or not specified, respond in English
+- Keep technical terms (autoencoder, reconstruction error, threshold, sensor names) in English regardless of language
+
+=== RESPONSE GUIDELINES ===
+- Be concise and technical
+- Use actual numbers from the engine data provided in the page context
+- When asked about a specific engine, reference its actual error values, status, and cycles
+- When asked "why" an engine is flagged, explain which sensors are likely driving the high reconstruction error
+- When comparing engines, use their actual data
+- For maintenance recommendations, be specific: "schedule inspection within X cycles" based on the degradation rate
+- Do not make up data. If you don't have specific information, say so"""
+
+
+# ---- gemini setup ----
+genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
+gemini_model = genai.GenerativeModel('gemini-3.6-flash')
+
+
+@app.route('/api/chat', methods=['POST'])
+def chat():
+    data = request.get_json()
+    user_message = data.get('message', '')
+    page_context = data.get('context', {})
+    history = data.get('history', [])
+    language = data.get('language', 'english')
+
+    # build context string from current page state
+    context_str = "\nCurrent page state:\n"
+    if page_context.get('engine_id'):
+        context_str += f"- Selected engine: {page_context['engine_id']} ({page_context.get('dataset', 'train')} set)\n"
+    if page_context.get('status'):
+        context_str += f"- Engine status: {page_context['status']}\n"
+    if page_context.get('latest_error'):
+        context_str += f"- Latest reconstruction error: {page_context['latest_error']}\n"
+    if page_context.get('total_cycles'):
+        context_str += f"- Total cycles: {page_context['total_cycles']}\n"
+    if page_context.get('first_warning'):
+        context_str += f"- First warning at cycle: {page_context['first_warning']}\n"
+    if page_context.get('first_critical'):
+        context_str += f"- First critical at cycle: {page_context['first_critical']}\n"
+    if page_context.get('rul'):
+        context_str += f"- Remaining useful life: {page_context['rul']} cycles\n"
+    if page_context.get('page'):
+        context_str += f"- User is viewing: {page_context['page']} page\n"
+
+    context_str += f"\nRespond in: {language}\n"
+
+    # build conversation with memory
+    messages = [{'role': 'user', 'parts': [SYSTEM_PROMPT + context_str]}]
+    messages.append({'role': 'model', 'parts': ['Understood. I am the engine health monitoring assistant. I will only answer questions related to this project, use the current page context, respond in plain text without any formatting, and use the specified language.']})
+
+    # add conversation history
+    for msg in history:
+        role = 'user' if msg['role'] == 'user' else 'model'
+        messages.append({'role': role, 'parts': [msg['content']]})
+
+    # add current message
+    messages.append({'role': 'user', 'parts': [user_message]})
+
+    try:
+        response = gemini_model.generate_content(messages)
+        return jsonify({'response': response.text})
+    except Exception as e:
+        return jsonify({'response': f'Error: {str(e)}'}), 500
 if __name__ == '__main__':
-    app.run(debug=True, port=5051)
+    app.run(debug=True, port=5051, threaded=True)
