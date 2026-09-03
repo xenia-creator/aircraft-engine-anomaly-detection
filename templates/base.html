@@ -68,6 +68,9 @@
       <div class="topbar-right">
         <div class="live-pill"><span class="dot dot-green" style="margin-right:0"></span>Live</div>
         <div class="topbar-clock" id="topbar-clock">--:--:-- --</div>
+        <button class="icon-btn" type="button" id="how-it-works-btn" aria-label="How it works">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </button>
         <button class="icon-btn" type="button" aria-label="Notifications">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
         </button>
@@ -144,8 +147,309 @@
   </div>
 </div>
 
+<div class="hiw-overlay" id="hiw-overlay">
+  <div class="hiw-modal" id="hiw-modal">
+    <div class="hiw-header" id="hiw-header">
+      <div class="hiw-header-left">
+        <span class="hiw-header-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </span>
+        <div>
+          <div class="hiw-title">How It Works</div>
+          <div class="hiw-subtitle">A walkthrough of the anomaly detection pipeline</div>
+        </div>
+      </div>
+      <button class="hiw-close-btn" id="hiw-close-btn" type="button" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="hiw-body">
+      <div class="hiw-track" id="hiw-track">
+
+        <!-- Step 1 -->
+        <section class="hiw-step">
+          <div class="hiw-step-eyebrow">Step 1 of 10</div>
+          <h3 class="hiw-step-title">Raw Sensor Data</h3>
+          <div class="hiw-illustration">
+            <svg viewBox="0 0 600 160" class="hiw-wave-clip" preserveAspectRatio="xMidYMid meet">
+              <g class="hiw-wave-track">
+                <g>
+                  <path d="M0,50 q25,-20 50,0 q25,20 50,0 q25,-20 50,0 q25,20 50,0 q25,-20 50,0 q25,20 50,0 q25,-20 50,0 q25,20 50,0 q25,-20 50,0 q25,20 50,0 q25,-20 50,0 q25,20 50,0" fill="none" stroke="var(--accent-strong)" stroke-width="2.5" stroke-linecap="round"/>
+                  <path d="M0,90 q30,-30 60,0 q30,30 60,0 q30,-30 60,0 q30,30 60,0 q30,-30 60,0 q30,30 60,0 q30,-30 60,0 q30,30 60,0 q30,-30 60,0 q30,30 60,0" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round"/>
+                  <path d="M0,130 q18.75,-15 37.5,0 q18.75,15 37.5,0 q18.75,-15 37.5,0 q18.75,15 37.5,0 q18.75,-15 37.5,0 q18.75,15 37.5,0 q18.75,-15 37.5,0 q18.75,15 37.5,0 q18.75,-15 37.5,0 q18.75,15 37.5,0 q18.75,-15 37.5,0 q18.75,15 37.5,0 q18.75,-15 37.5,0 q18.75,15 37.5,0 q18.75,-15 37.5,0 q18.75,15 37.5,0" fill="none" stroke="var(--violet)" stroke-width="2.5" stroke-linecap="round"/>
+                </g>
+                <g transform="translate(600,0)">
+                  <path d="M0,50 q25,-20 50,0 q25,20 50,0 q25,-20 50,0 q25,20 50,0 q25,-20 50,0 q25,20 50,0 q25,-20 50,0 q25,20 50,0 q25,-20 50,0 q25,20 50,0 q25,-20 50,0 q25,20 50,0" fill="none" stroke="var(--accent-strong)" stroke-width="2.5" stroke-linecap="round"/>
+                  <path d="M0,90 q30,-30 60,0 q30,30 60,0 q30,-30 60,0 q30,30 60,0 q30,-30 60,0 q30,30 60,0 q30,-30 60,0 q30,30 60,0 q30,-30 60,0 q30,30 60,0" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round"/>
+                  <path d="M0,130 q18.75,-15 37.5,0 q18.75,15 37.5,0 q18.75,-15 37.5,0 q18.75,15 37.5,0 q18.75,-15 37.5,0 q18.75,15 37.5,0 q18.75,-15 37.5,0 q18.75,15 37.5,0 q18.75,-15 37.5,0 q18.75,15 37.5,0 q18.75,-15 37.5,0 q18.75,15 37.5,0 q18.75,-15 37.5,0 q18.75,15 37.5,0 q18.75,-15 37.5,0 q18.75,15 37.5,0" fill="none" stroke="var(--violet)" stroke-width="2.5" stroke-linecap="round"/>
+                </g>
+              </g>
+            </svg>
+          </div>
+          <p class="hiw-step-desc">21 sensors on each engine record temperature, pressure, and speed readings once per flight cycle — a continuous multivariate stream from takeoff to end of life.</p>
+        </section>
+
+        <!-- Step 2 -->
+        <section class="hiw-step">
+          <div class="hiw-step-eyebrow">Step 2 of 10</div>
+          <h3 class="hiw-step-title">Feature Selection</h3>
+          <div class="hiw-illustration">
+            <svg viewBox="0 0 600 200" preserveAspectRatio="xMidYMid meet">
+              <text x="50" y="18" font-size="12" font-weight="600" fill="var(--text-muted)">Constant sensors — dropped (7)</text>
+              <line x1="50" y1="35" x2="550" y2="35" stroke="var(--text-muted)" stroke-width="2" stroke-dasharray="6 6" opacity="0.6"/>
+              <line x1="50" y1="55" x2="550" y2="55" stroke="var(--text-muted)" stroke-width="2" stroke-dasharray="6 6" opacity="0.6"/>
+              <line x1="50" y1="75" x2="550" y2="75" stroke="var(--text-muted)" stroke-width="2" stroke-dasharray="6 6" opacity="0.6"/>
+
+              <text x="50" y="113" font-size="12" font-weight="600" fill="var(--accent-strong)">Variance-rich sensors — retained (14)</text>
+              <path d="M50,130 q25,-16 50,0 q25,16 50,0 q25,-16 50,0 q25,16 50,0 q25,-16 50,0 q25,16 50,0 q25,-16 50,0 q25,16 50,0 q25,-16 50,0 q25,16 50,0" fill="none" stroke="var(--accent-strong)" stroke-width="2.5" stroke-linecap="round"/>
+              <path d="M50,155 q31.25,-22 62.5,0 q31.25,22 62.5,0 q31.25,-22 62.5,0 q31.25,22 62.5,0 q31.25,-22 62.5,0 q31.25,22 62.5,0 q31.25,-22 62.5,0 q31.25,22 62.5,0" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round"/>
+              <path d="M50,180 q25,-10 50,0 q25,10 50,0 q25,-10 50,0 q25,10 50,0 q25,-10 50,0 q25,10 50,0 q25,-10 50,0 q25,10 50,0 q25,-10 50,0 q25,10 50,0" fill="none" stroke="var(--violet)" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <p class="hiw-step-desc">7 sensors never move — they're dropped. The remaining 14 sensors carry real variance and define the feature space the scaler and model are fit on.</p>
+        </section>
+
+        <!-- Step 3 -->
+        <section class="hiw-step">
+          <div class="hiw-step-eyebrow">Step 3 of 10</div>
+          <h3 class="hiw-step-title">Healthy Data Extraction</h3>
+          <div class="hiw-illustration">
+            <svg viewBox="0 0 600 160" preserveAspectRatio="xMidYMid meet">
+              <rect x="40" y="70" width="520" height="40" rx="6" fill="var(--bg-card)" stroke="var(--border)"/>
+              <rect x="40" y="70" width="156" height="40" rx="6" fill="var(--green-soft)" stroke="var(--green)" stroke-width="1.5"/>
+              <line x1="196" y1="60" x2="196" y2="120" stroke="var(--green)" stroke-width="1.5" stroke-dasharray="4 3"/>
+              <rect x="163" y="34" width="66" height="20" rx="10" fill="var(--green-soft)" stroke="var(--green)"/>
+              <text x="196" y="48" font-size="11" font-weight="700" fill="var(--green)" text-anchor="middle">30%</text>
+              <text x="118" y="130" font-size="11" font-weight="700" fill="var(--green)" text-anchor="middle">Healthy training data</text>
+              <text x="383" y="130" font-size="11" font-weight="600" fill="var(--text-secondary)" text-anchor="middle">Rest of lifecycle (unused for training)</text>
+              <text x="40" y="146" font-size="10.5" fill="var(--text-muted)">Cycle 1</text>
+              <text x="560" y="146" font-size="10.5" fill="var(--text-muted)" text-anchor="end">End of life</text>
+            </svg>
+          </div>
+          <p class="hiw-step-desc">For each training engine, only the first 30% of its life is assumed healthy. That slice is what the autoencoder learns "normal" from.</p>
+        </section>
+
+        <!-- Step 4 -->
+        <section class="hiw-step">
+          <div class="hiw-step-eyebrow">Step 4 of 10</div>
+          <h3 class="hiw-step-title">Autoencoder Training</h3>
+          <div class="hiw-illustration">
+            <svg viewBox="0 0 600 200" preserveAspectRatio="xMidYMid meet">
+              <polygon points="70,60 210,73 210,127 70,140" fill="var(--accent-soft)"/>
+              <polygon points="210,73 300,85 300,115 210,127" fill="var(--violet-soft)"/>
+              <polygon points="300,85 390,73 390,127 300,115" fill="var(--violet-soft)"/>
+              <polygon points="390,73 530,60 530,140 390,127" fill="var(--accent-soft)"/>
+
+              <circle class="hiw-flow-dot" style="--dx:140px; --dy:6.5px; animation-delay:0s" cx="70" cy="60" r="3.5" fill="var(--accent-strong)"/>
+              <circle class="hiw-flow-dot" style="--dx:90px; --dy:6px; animation-delay:0.5s" cx="210" cy="73" r="3.5" fill="var(--violet)"/>
+              <circle class="hiw-flow-dot" style="--dx:90px; --dy:-6px; animation-delay:1s" cx="300" cy="115" r="3.5" fill="var(--violet)"/>
+              <circle class="hiw-flow-dot" style="--dx:140px; --dy:-6.5px; animation-delay:1.5s" cx="390" cy="127" r="3.5" fill="var(--accent-strong)"/>
+
+              <g fill="var(--accent-strong)">
+                <circle cx="70" cy="60" r="5"/><circle cx="70" cy="76" r="5"/><circle cx="70" cy="92" r="5"/>
+                <circle cx="70" cy="108" r="5"/><circle cx="70" cy="124" r="5"/><circle cx="70" cy="140" r="5"/>
+              </g>
+              <g fill="var(--accent)">
+                <circle cx="210" cy="73" r="5"/><circle cx="210" cy="91" r="5"/><circle cx="210" cy="109" r="5"/><circle cx="210" cy="127" r="5"/>
+              </g>
+              <g class="hiw-node-glow" fill="var(--violet)">
+                <circle cx="300" cy="85" r="5.5"/><circle cx="300" cy="115" r="5.5"/>
+              </g>
+              <g fill="var(--accent)">
+                <circle cx="390" cy="73" r="5"/><circle cx="390" cy="91" r="5"/><circle cx="390" cy="109" r="5"/><circle cx="390" cy="127" r="5"/>
+              </g>
+              <g fill="var(--accent-strong)">
+                <circle cx="530" cy="60" r="5"/><circle cx="530" cy="76" r="5"/><circle cx="530" cy="92" r="5"/>
+                <circle cx="530" cy="108" r="5"/><circle cx="530" cy="124" r="5"/><circle cx="530" cy="140" r="5"/>
+              </g>
+
+              <text x="70" y="168" font-size="13" font-weight="700" fill="var(--text-primary)" text-anchor="middle">14</text>
+              <text x="210" y="168" font-size="13" font-weight="700" fill="var(--text-primary)" text-anchor="middle">8</text>
+              <text x="300" y="168" font-size="13" font-weight="700" fill="var(--violet)" text-anchor="middle">4</text>
+              <text x="390" y="168" font-size="13" font-weight="700" fill="var(--text-primary)" text-anchor="middle">8</text>
+              <text x="530" y="168" font-size="13" font-weight="700" fill="var(--text-primary)" text-anchor="middle">14</text>
+              <text x="140" y="188" font-size="10.5" fill="var(--text-secondary)" text-anchor="middle">Encoder</text>
+              <text x="460" y="188" font-size="10.5" fill="var(--text-secondary)" text-anchor="middle">Decoder</text>
+            </svg>
+          </div>
+          <p class="hiw-step-desc">A 14→8→4→8→14 network (ReLU encoder, Sigmoid output) squeezes each healthy reading through a 4-unit bottleneck and learns to reconstruct it on the way back out.</p>
+        </section>
+
+        <!-- Step 5 -->
+        <section class="hiw-step">
+          <div class="hiw-step-eyebrow">Step 5 of 10</div>
+          <h3 class="hiw-step-title">Anomaly Scoring</h3>
+          <div class="hiw-illustration">
+            <svg viewBox="0 0 600 180" preserveAspectRatio="xMidYMid meet">
+              <path d="M20,140 L90,142 L160,138 L230,141 L300,139 L360,140 L410,130 L450,100 L485,60 L515,30 L545,15 L545,170 L20,170 Z" fill="var(--accent-soft)" stroke="none"/>
+              <line x1="20" y1="170" x2="560" y2="170" stroke="var(--border-strong)" stroke-width="1.5"/>
+              <path pathLength="1000" style="--path-len:1000" class="hiw-draw-path" d="M20,140 L90,142 L160,138 L230,141 L300,139 L360,140 L410,130 L450,100 L485,60 L515,30 L545,15" fill="none" stroke="var(--accent-strong)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <text x="20" y="20" font-size="11" fill="var(--text-secondary)">Reconstruction error</text>
+              <text x="560" y="178" font-size="11" fill="var(--text-secondary)" text-anchor="end" transform="translate(0,-8)">Cycle →</text>
+            </svg>
+          </div>
+          <p class="hiw-step-desc">Feed any reading back through the trained network and measure the gap between input and reconstruction. Healthy data reconstructs cleanly; degraded data doesn't — the error spikes.</p>
+        </section>
+
+        <!-- Step 6 -->
+        <section class="hiw-step">
+          <div class="hiw-step-eyebrow">Step 6 of 10</div>
+          <h3 class="hiw-step-title">Dual Threshold Alerts</h3>
+          <div class="hiw-illustration">
+            <svg viewBox="0 0 600 180" preserveAspectRatio="xMidYMid meet">
+              <rect x="20" y="95" width="530" height="75" fill="var(--green-soft)" opacity="0.4"/>
+              <rect x="20" y="55" width="530" height="40" fill="var(--amber-soft)"/>
+              <rect x="20" y="10" width="530" height="45" fill="var(--red-soft)"/>
+              <line x1="20" y1="95" x2="550" y2="95" stroke="var(--amber)" stroke-width="2" stroke-dasharray="6 4"/>
+              <line x1="20" y1="55" x2="550" y2="55" stroke="var(--red)" stroke-width="2" stroke-dasharray="6 4"/>
+              <text x="25" y="89" font-size="11" font-weight="700" fill="var(--amber)">Warning · 2.8σ</text>
+              <text x="25" y="49" font-size="11" font-weight="700" fill="var(--red)">Critical · 3.5σ</text>
+              <path pathLength="1000" style="--path-len:1000" class="hiw-draw-path" d="M20,150 L90,152 L160,148 L230,151 L300,149 L360,150 L410,120 L450,90 L480,60 L505,40 L525,20" fill="none" stroke="var(--text-primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <p class="hiw-step-desc">Two thresholds fire off the same error curve. Warning (2.8σ) is early enough to schedule an inspection; Critical (3.5σ) means ground the aircraft.</p>
+        </section>
+
+        <!-- Step 7 -->
+        <section class="hiw-step">
+          <div class="hiw-step-eyebrow">Step 7 of 10</div>
+          <h3 class="hiw-step-title">Multi-Engine Validation</h3>
+          <div class="hiw-illustration">
+            <svg viewBox="0 0 600 160" preserveAspectRatio="xMidYMid meet">
+              <path pathLength="1000" style="--path-len:1000; animation-delay:0s" class="hiw-draw-path" d="M20,140 L70,142 L120,138 L160,140 L190,100 L210,50 L220,20" fill="none" stroke="var(--accent-strong)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path pathLength="1000" style="--path-len:1000; animation-delay:0.3s" class="hiw-draw-path" d="M20,140 L80,141 L140,139 L200,142 L260,140 L300,95 L325,45 L340,18" fill="none" stroke="var(--green)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path pathLength="1000" style="--path-len:1000; animation-delay:0.6s" class="hiw-draw-path" d="M20,140 L90,142 L160,138 L230,141 L300,139 L360,140 L410,90 L440,40 L460,16" fill="none" stroke="var(--violet)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path pathLength="1000" style="--path-len:1000; animation-delay:0.9s" class="hiw-draw-path" d="M20,140 L100,141 L180,139 L260,142 L340,140 L420,141 L480,100 L520,50 L550,25 L580,15" fill="none" stroke="var(--amber)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              <line x1="20" y1="150" x2="580" y2="150" stroke="var(--border-strong)" stroke-width="1.5"/>
+              <text x="300" y="15" font-size="10.5" fill="var(--text-secondary)" text-anchor="middle">128 – 362 cycle lifespans, same flat-then-spike shape every time</text>
+            </svg>
+          </div>
+          <p class="hiw-step-desc">Run the same scoring across all 100 training engines and the pattern holds: flat and low while healthy, then a rise into failure — regardless of how long the engine lasted.</p>
+        </section>
+
+        <!-- Step 8 -->
+        <section class="hiw-step">
+          <div class="hiw-step-eyebrow">Step 8 of 10</div>
+          <h3 class="hiw-step-title">Threshold Optimization</h3>
+          <div class="hiw-illustration">
+            <svg viewBox="0 0 600 180" preserveAspectRatio="xMidYMid meet">
+              <line x1="40" y1="110" x2="560" y2="110" stroke="var(--border-strong)" stroke-width="2"/>
+              <g stroke="var(--text-muted)" stroke-width="1.5">
+                <line x1="40" y1="105" x2="40" y2="115"/>
+                <line x1="202.5" y1="105" x2="202.5" y2="115"/>
+                <line x1="365" y1="105" x2="365" y2="115"/>
+                <line x1="527.5" y1="105" x2="527.5" y2="115"/>
+              </g>
+              <g font-size="11" fill="var(--text-secondary)" text-anchor="middle">
+                <text x="40" y="132">2.0</text>
+                <text x="202.5" y="132">2.5</text>
+                <text x="365" y="132">3.0</text>
+                <text x="527.5" y="132">3.5</text>
+              </g>
+
+              <line x1="300" y1="110" x2="300" y2="60" stroke="var(--amber)" stroke-width="2"/>
+              <circle cx="300" cy="60" r="5.5" fill="var(--amber)"/>
+              <text x="300" y="45" font-size="11.5" font-weight="700" fill="var(--amber)" text-anchor="middle">Warning · 2.8σ</text>
+              <text x="300" y="30" font-size="10" fill="var(--text-secondary)" text-anchor="middle">105 cyc early, &lt;1 false alarm</text>
+
+              <line x1="527.5" y1="110" x2="527.5" y2="60" stroke="var(--red)" stroke-width="2"/>
+              <circle cx="527.5" cy="60" r="5.5" fill="var(--red)"/>
+              <text x="490" y="45" font-size="11.5" font-weight="700" fill="var(--red)" text-anchor="middle">Critical · 3.5σ</text>
+              <text x="490" y="30" font-size="10" fill="var(--text-secondary)" text-anchor="middle">80 cyc early, ~0 false alarms</text>
+
+              <text x="300" y="158" font-size="11" fill="var(--text-muted)" text-anchor="middle">k · σ multiplier, swept 2.0 → 3.0 in 0.1 steps across 100 engines</text>
+            </svg>
+          </div>
+          <p class="hiw-step-desc">Sweeping k from 2.0σ to 3.0σ in 0.1 increments across all 100 engines picked out 2.8σ (105 cycles early warning, under 1 false alarm per engine) and 3.5σ (80 cycles early, near-zero false alarms).</p>
+        </section>
+
+        <!-- Step 9 -->
+        <section class="hiw-step">
+          <div class="hiw-step-eyebrow">Step 9 of 10</div>
+          <h3 class="hiw-step-title">Model Comparison</h3>
+          <div class="hiw-illustration">
+            <svg viewBox="0 0 600 200" preserveAspectRatio="xMidYMid meet">
+              <line x1="200" y1="20" x2="200" y2="180" stroke="var(--border)" stroke-width="1"/>
+              <line x1="410" y1="20" x2="410" y2="180" stroke="var(--border)" stroke-width="1"/>
+
+              <path pathLength="1000" style="--path-len:1000; animation-delay:0s" class="hiw-draw-path" d="M30,140 L70,141 L110,139 L140,110 L160,60 L175,30" fill="none" stroke="var(--accent-strong)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+              <path pathLength="1000" style="--path-len:1000; animation-delay:0.3s" class="hiw-draw-path" d="M230,140 L245,120 L260,150 L275,100 L290,135 L305,90 L320,115 L335,70 L350,95 L365,40" fill="none" stroke="var(--amber)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+              <path pathLength="1000" style="--path-len:1000; animation-delay:0.6s" class="hiw-draw-path" d="M430,140 L450,140 L450,50 L470,50 L470,140 L490,140 L490,50 L505,50 L505,140 L525,140 L525,50 L540,50 L540,140 L560,140 L560,50 L570,50" fill="none" stroke="var(--red)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+
+              <text x="100" y="165" font-size="12" font-weight="700" fill="var(--text-primary)" text-anchor="middle">Autoencoder</text>
+              <text x="100" y="180" font-size="10" fill="var(--text-secondary)" text-anchor="middle">smooth · 105 cyc early</text>
+              <text x="300" y="165" font-size="12" font-weight="700" fill="var(--text-primary)" text-anchor="middle">Isolation Forest</text>
+              <text x="300" y="180" font-size="10" fill="var(--text-secondary)" text-anchor="middle">noisy · 72 cyc early</text>
+              <text x="500" y="165" font-size="12" font-weight="700" fill="var(--text-primary)" text-anchor="middle">DBSCAN</text>
+              <text x="500" y="180" font-size="10" fill="var(--text-secondary)" text-anchor="middle">unreliable · flickers</text>
+            </svg>
+          </div>
+          <p class="hiw-step-desc">Autoencoder reconstruction error gives a smooth, continuous signal (105 cycles of warning). Isolation Forest is noisier (72 cycles). DBSCAN only produces unstable binary in/out-of-cluster flips.</p>
+        </section>
+
+        <!-- Step 10 -->
+        <section class="hiw-step">
+          <div class="hiw-step-eyebrow">Step 10 of 10</div>
+          <h3 class="hiw-step-title">Unseen Data Validation</h3>
+          <div class="hiw-illustration">
+            <svg viewBox="0 0 600 200" preserveAspectRatio="xMidYMid meet">
+              <line x1="50" y1="20" x2="50" y2="170" stroke="var(--border-strong)" stroke-width="1.5"/>
+              <line x1="50" y1="170" x2="570" y2="170" stroke="var(--border-strong)" stroke-width="1.5"/>
+              <path d="M70,155 L546,30" stroke="var(--text-muted)" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.5"/>
+
+              <g stroke="var(--bg-card)" stroke-width="1.5">
+                <circle cx="70" cy="159" r="5" fill="var(--green)"/>
+                <circle cx="104" cy="141" r="5" fill="var(--green)"/>
+                <circle cx="138" cy="142" r="5" fill="var(--green)"/>
+                <circle cx="172" cy="124" r="5" fill="var(--green)"/>
+                <circle cx="206" cy="125" r="5" fill="var(--amber)"/>
+                <circle cx="240" cy="105" r="5" fill="var(--amber)"/>
+                <circle cx="274" cy="105" r="5" fill="var(--amber)"/>
+                <circle cx="308" cy="87" r="5" fill="var(--amber)"/>
+                <circle cx="342" cy="89" r="5" fill="var(--amber)"/>
+                <circle cx="376" cy="71" r="5" fill="var(--red)"/>
+                <circle cx="410" cy="72" r="5" fill="var(--red)"/>
+                <circle cx="444" cy="52" r="5" fill="var(--red)"/>
+                <circle cx="478" cy="52" r="5" fill="var(--red)"/>
+                <circle cx="512" cy="33" r="5" fill="var(--red)"/>
+                <circle cx="546" cy="33" r="5" fill="var(--red)"/>
+              </g>
+
+              <text x="55" y="15" font-size="11" fill="var(--text-secondary)">Reconstruction error ↑</text>
+              <text x="310" y="192" font-size="11" fill="var(--text-secondary)" text-anchor="middle">→ Approaching failure (decreasing remaining useful life)</text>
+            </svg>
+          </div>
+          <p class="hiw-step-desc">Validated against 100 completely unseen test engines: reconstruction error tracks remaining life inversely — near-failure engines run hot, healthy ones stay under the thresholds.</p>
+        </section>
+
+      </div>
+    </div>
+
+    <div class="hiw-footer">
+      <div class="hiw-dots" id="hiw-dots">
+        <button class="hiw-dot" type="button" aria-label="Go to step 1"></button>
+        <button class="hiw-dot" type="button" aria-label="Go to step 2"></button>
+        <button class="hiw-dot" type="button" aria-label="Go to step 3"></button>
+        <button class="hiw-dot" type="button" aria-label="Go to step 4"></button>
+        <button class="hiw-dot" type="button" aria-label="Go to step 5"></button>
+        <button class="hiw-dot" type="button" aria-label="Go to step 6"></button>
+        <button class="hiw-dot" type="button" aria-label="Go to step 7"></button>
+        <button class="hiw-dot" type="button" aria-label="Go to step 8"></button>
+        <button class="hiw-dot" type="button" aria-label="Go to step 9"></button>
+        <button class="hiw-dot" type="button" aria-label="Go to step 10"></button>
+      </div>
+      <div class="hiw-nav-buttons">
+        <button class="hiw-nav-btn" id="hiw-prev-btn" type="button">Previous</button>
+        <button class="hiw-nav-btn hiw-nav-btn-primary" id="hiw-next-btn" type="button">Next</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="{{ url_for('static', filename='js/common.js') }}"></script>
 <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+<script src="{{ url_for('static', filename='js/how-it-works.js') }}"></script>
 {% block scripts %}{% endblock %}
 </body>
 </html>
