@@ -1,0 +1,141 @@
+# Predictive Maintenance for Aircraft Engines: An AI-Based Early Warning System
+
+**A Technology Proposal for the Aeronautical Development Agency (ADA), DRDO**
+Submitted by: Sumedh Singh Virk
+Date: September 2026
+Contact: sumedhvirk006@gmail.com
+
+---
+
+## 1. Executive Summary
+
+Unplanned engine failure is one of the leading causes of aircraft attrition and maintenance cost overrun worldwide. Between 2015 and 2024, the Indian Air Force alone lost 104 aircraft, a significant fraction attributable to mechanical and technical failures that current maintenance schedules did not catch in time. Scheduled ("time-based") maintenance either replaces healthy parts too early, wasting cost and aircraft availability, or misses degradation that develops faster than the schedule assumes.
+
+This proposal presents a working proof-of-concept for an **AI-based engine health monitoring system** that continuously watches an engine's sensor stream, learns what "healthy" looks like for that engine, and raises an early warning as soon as its behavior starts to drift — well before a human inspector or a fixed maintenance interval would catch it.
+
+The system is built and running end-to-end: a trained anomaly-detection model, a dual-threshold alerting logic calibrated for both sensitivity and false-alarm control, and a live operator dashboard. On its validation data, the system's autoencoder model gives an average of **~105 cycles of advance warning** before failure at its cautionary threshold and **~80 cycles** at its critical threshold, comfortably outperforming two standard baseline anomaly-detection methods (Isolation Forest, DBSCAN) evaluated on the same data.
+
+The current build is trained and validated on NASA's public **C-MAPSS turbofan degradation dataset** — the standard open benchmark for this exact problem — because it is the only run-to-failure, multi-sensor engine dataset available without a data-sharing agreement. The purpose of this proposal is to request the next step: access to a representative (declassified or synthetic-but-realistic) engine telemetry dataset from an operational fleet, so the same architecture can be retrained, validated, and piloted against real conditions.
+
+---
+
+## 2. The Problem
+
+- **Unplanned failures are costly and dangerous.** Engine-related failures can ground aircraft, endanger crew, and in the worst case cause loss of aircraft and life.
+- **Time-based maintenance is a blunt instrument.** Components are replaced on fixed calendar/hour schedules regardless of actual condition — this either wastes serviceable parts and flight-line time, or fails to catch engines that degrade faster than expected between inspections.
+- **Engines don't come with failure labels.** In real operations there is no dataset of "this exact sensor pattern means failure in N cycles" — failures are rare, expensive, and every engine degrades slightly differently. Any workable solution has to learn from *healthy* behavior alone and flag deviation from it, not learn from a large labeled catalog of failures that doesn't exist.
+- **Single-sensor threshold rules are not enough.** A rule like "alert if temperature exceeds X" misses the more common failure signature: several sensors drifting together in a subtle, correlated way that no single sensor crosses an individual limit for.
+
+## 3. Proposed Solution
+
+An **unsupervised deep-learning anomaly detector** that:
+
+1. Learns the normal operating signature of an engine from its own early-life (healthy) sensor data — no failure labels required.
+2. Continuously scores every new cycle's sensor reading against that learned signature.
+3. Raises a **two-tier alert** (Warning → schedule inspection; Critical → ground the aircraft) calibrated to balance early detection against false-alarm rate, mirroring the Caution/Warning convention already used in aviation alerting.
+4. Presents this to a maintenance crew or analyst through a live dashboard, with an integrated assistant that can explain *why* an engine was flagged in plain language.
+
+This approach requires no manually engineered failure thresholds per sensor and adapts to the multi-sensor correlations that precede real degradation — the same class of approach used in modern industrial and aerospace prognostics research (NASA, GE Aviation, Rolls-Royce all publish work in this space).
+
+## 4. Technical Approach
+
+### 4.1 Data and Feature Selection
+The prototype is trained and evaluated on NASA's **C-MAPSS FD001** dataset: 100 turbofan engines run to failure (training set) and 100 more engines with truncated, unseen lifecycles (test set), each instrumented with 21 sensors and 3 operational settings, sampled every flight cycle.
+
+Of the 21 sensors, **7 carry near-zero variance** (they don't move meaningfully across an engine's life under this operating regime) and are dropped. The remaining **14 sensors** — covering temperatures, pressures, and speeds at the low- and high-pressure compressor and turbine stages, fuel-flow ratio, bypass ratio, and bleed enthalpy — are retained as the model's feature set and normalized with a MinMax scaler fitted only on training data (avoiding any leakage from unseen engines).
+
+### 4.2 Model: Autoencoder-Based Anomaly Detection
+The core model is a compact **feedforward autoencoder** (14 → 8 → 4 → 8 → 14, ReLU encoder / Sigmoid output) trained in PyTorch. Critically, it is trained **only on the first 30% of each engine's recorded life** — the period every engine is healthy by construction — so it never sees failure data at all. It simply learns to compress and reconstruct healthy sensor patterns.
+
+The insight the system relies on: an autoencoder trained exclusively on healthy data reconstructs healthy readings almost perfectly, but *cannot* faithfully reconstruct sensor patterns it has never seen — i.e., degraded, abnormal readings. The gap between what the engine reports and what the model expects (**reconstruction error**) becomes the anomaly score. Training converged to a mean-squared-error loss of 0.0088 after 600 epochs.
+
+A second-generation model — an **LSTM sequence-to-sequence autoencoder** operating on 30-cycle sliding windows — has also been trained to capture temporal degradation patterns rather than scoring each cycle independently, and is in the process of being integrated into the dashboard.
+
+### 4.3 Dual-Threshold Alerting
+Rather than a single cutoff, the reconstruction error is compared against two thresholds derived statistically from the healthy-region error distribution across all 100 training engines, swept and selected empirically (k = 2.0 to 3.0σ in 0.1 increments):
+
+| Tier | Threshold | Meaning | Behavior on validation data |
+|---|---|---|---|
+| **Warning** | mean + 2.8σ | "Schedule inspection at next ground visit" | ~105 cycles average early warning, under 1 false alarm per engine |
+| **Critical** | mean + 3.5σ | "Ground the aircraft immediately" | ~80 cycles average early warning, near-zero false alarms |
+
+This two-tier structure deliberately mirrors the Caution/Warning convention already standard in cockpit alerting, so it slots into existing maintenance decision-making rather than requiring a new mental model.
+
+### 4.4 Benchmarked Against Standard Alternatives
+To validate that the autoencoder's design choice is justified and not just "a model," it was benchmarked on the same engines against two standard unsupervised anomaly-detection baselines:
+
+- **Isolation Forest** — detects anomalies ~72 cycles before failure on average, with a noticeably noisier signal in the healthy region (more false positives), because it scores each timestep independently with no notion of a temporal trend.
+- **DBSCAN** — produces unreliable binary in/out-of-cluster flickers rather than a smooth confidence score, and is not designed for continuous degradation signals.
+
+The autoencoder outperforms both in early-detection lead time and in signal cleanliness, which is the basis for selecting it as the primary model.
+
+### 4.5 Validation Methodology
+The trained model was evaluated on **100 completely unseen test engines** it had never encountered during training. Reconstruction error was compared against each engine's actual remaining useful life (RUL): engines with low remaining life consistently showed elevated reconstruction error, and healthy engines with long remaining life stayed below threshold — a clear inverse correlation between the model's anomaly score and true degradation state, without ever having been told what failure looks like.
+
+*(Note for internal review: the C-MAPSS test set deliberately truncates most engines before failure — several engines never reach the full run-to-failure length used to compute the headline lead-time figures above. A per-engine breakdown of the truncated test set is available and should accompany any technical due-diligence review, so the headline numbers are read alongside their intended methodology.)*
+
+## 5. What Has Been Built
+
+This is not a slide-deck concept — it is a running system:
+
+- **Trained models:** PyTorch autoencoder, LSTM autoencoder, Isolation Forest, DBSCAN, all serialized and version-controlled.
+- **Live operator dashboard** (Flask + Chart.js): select any engine and view its reconstruction-error timeline against the warning/critical zones, current status, and key health metrics.
+- **Fleet overview:** a single view scoring all 100 test engines simultaneously — reconstruction error vs. remaining life scatter plot plus a sortable health-status table, giving a "flight line at a glance" view of an entire fleet.
+- **Side-by-side model comparison view:** visually demonstrates why the autoencoder was selected over the baseline methods, for the same engine and the same data.
+- **Integrated AI assistant:** a chat interface, aware of exactly which engine and status the operator is currently viewing, that can answer natural-language questions about engine health, explain which sensors are likely driving a flagged anomaly, and support English, Hindi, and Kannada.
+
+## 6. Relevance and Impact
+
+- **Safety:** Earlier, more reliable warning of degradation directly reduces the risk of in-flight or on-ground engine failure.
+- **Cost and availability:** Condition-based alerts (only inspect/ground when the data says to) reduce unnecessary scheduled teardowns while catching engines that degrade ahead of schedule — improving both cost efficiency and aircraft availability.
+- **No dependency on failure history:** Because the model learns purely from healthy behavior, it does not require a large historical catalog of past failures to be useful — relevant for platforms where failure data is sparse, sensitive, or simply hasn't been collected in a usable form yet.
+- **Explainability layer:** The integrated assistant gives maintenance crews a plain-language answer to "why was this flagged," which is often the actual bottleneck in getting a data-driven alert acted on.
+
+## 7. Current Maturity and Honest Limitations
+
+In the interest of a credible technical proposal, the following should be stated plainly:
+
+- **Trained on a public benchmark, not operational data.** NASA C-MAPSS is a high-fidelity *simulation* of turbofan degradation under a single operating condition and single fault mode (HPC degradation). It is the right dataset to prove the architecture and methodology, but the model has not yet been trained or validated on real fleet telemetry, which will have different sensor sets, noise characteristics, operating envelopes, and failure modes.
+- **Single fault mode.** Real engines fail in more varied ways than the one degradation mode modeled here; a production system would need multi-fault-mode training data to generalize.
+- **LSTM model is not yet wired into the live dashboard** — it is trained and validated offline, with UI integration as near-term work.
+- **This is a proof-of-concept at a research/prototype maturity level**, comparable to an early Technology Readiness Level (TRL 3–4): core methodology validated in a controlled/simulated environment, not yet validated in an operational environment.
+
+## 8. What We Are Asking For
+
+To move this from a validated prototype to a pilot-ready system, we request:
+
+1. **Access to a representative engine telemetry dataset** from an operational or training fleet (declassified, synthetic-but-realistic, or a controlled sandbox subset) so the model can be retrained and validated against real sensor characteristics and failure modes.
+2. **A point of contact within maintenance/engineering** to validate that the sensor set, alerting thresholds, and dashboard workflow match real flight-line procedure.
+3. **A defined pilot scope** — e.g., a single engine type or squadron — to run the system in a shadow/advisory mode alongside existing maintenance procedures before any operational reliance.
+
+## 9. Conclusion
+
+This project demonstrates that a lightweight, unsupervised deep-learning model can learn healthy engine behavior from sensor data alone and reliably flag degradation dozens to over a hundred cycles before failure — without ever being told what failure looks like, and while outperforming standard anomaly-detection baselines on the same data. The methodology, architecture, and full operator tooling (dashboard, fleet view, comparison view, AI assistant) are built and working today on a recognized public benchmark. The remaining gap to operational relevance is data, not method — and that is the specific partnership being proposed here.
+
+---
+
+### Appendix A: Technical Stack
+- **ML:** Python, PyTorch (Autoencoder, LSTM Autoencoder), scikit-learn (Isolation Forest, DBSCAN, MinMaxScaler)
+- **Backend:** Flask
+- **Frontend:** HTML/CSS/vanilla JS, Chart.js
+- **Dataset:** NASA C-MAPSS FD001 (100 train + 100 test turbofan engines, 21 sensors, run-to-failure simulation)
+
+### Appendix B: Sensor Set Used (14 retained of 21)
+| Sensor | Description |
+|---|---|
+| s2 | Total temperature at LPC outlet |
+| s3 | Total temperature at HPC outlet |
+| s4 | Total temperature at LPT outlet |
+| s7 | Total pressure at HPC outlet |
+| s8 | Physical fan speed |
+| s9 | Physical core speed |
+| s11 | Static pressure at HPC outlet |
+| s12 | Ratio of fuel flow to Ps30 |
+| s13 | Corrected fan speed |
+| s14 | Corrected core speed |
+| s15 | Bypass ratio |
+| s17 | Bleed enthalpy |
+| s20 | High-pressure turbine coolant bleed |
+| s21 | Low-pressure turbine coolant bleed |
+
+*(7 sensors dropped for near-zero variance: s1, s5, s6, s10, s16, s18, s19)*

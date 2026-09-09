@@ -126,11 +126,11 @@ rul = pd.read_csv('data/RUL_FD001.txt', header=None, names=['rul'])
 
 # the LSTM was fitted with its own MinMaxScaler, so it needs its own scaled copies -
 # reusing train_df/test_df would feed it data scaled for the dense autoencoder
-lstm_train_df = pd.read_csv('data/train_FD001.txt', sep='\s+', header=None, names=columns)
+lstm_train_df = pd.read_csv('data/train_FD001.txt', sep=r'\s+', header=None, names=columns)
 lstm_train_df = lstm_train_df[['unit_id', 'cycle'] + lstm_keep_sensors]
 lstm_train_df[lstm_keep_sensors] = lstm_scaler.transform(lstm_train_df[lstm_keep_sensors])
 
-lstm_test_df = pd.read_csv('data/test_FD001.txt', sep='\s+', header=None, names=columns)
+lstm_test_df = pd.read_csv('data/test_FD001.txt', sep=r'\s+', header=None, names=columns)
 lstm_test_df = lstm_test_df[['unit_id', 'cycle'] + lstm_keep_sensors]
 lstm_test_df[lstm_keep_sensors] = lstm_scaler.transform(lstm_test_df[lstm_keep_sensors])
 
@@ -558,4 +558,4 @@ def chat():
     except Exception as e:
         return jsonify({'response': f'Error: {str(e)}'}), 500
 if __name__ == '__main__':
-    app.run(debug=True, port=5051, threaded=True)
+    app.run(debug=True, port=5052, threaded=True)
